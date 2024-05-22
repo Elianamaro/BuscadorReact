@@ -94,6 +94,8 @@ option {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 10;
   cursor: grab;
+  border: 1px solid black; /* Cambiado de border-color a border para asegurar la visibilidad del borde */
+  border-radius: 8px; /* Agrega un borde redondeado para una mejor estética */
 }
 
 .floating-window:active {

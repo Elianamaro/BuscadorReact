@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import './GoogleMaps.css';
 
-const GoogleMaps = ({ lugares }) => {
+const GoogleMaps = ({ lugares, zoom }) => {
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const infoWindowRef = useRef(null);
@@ -29,8 +28,8 @@ const GoogleMaps = ({ lugares }) => {
 
     function initMap() {
       mapRef.current = new window.google.maps.Map(document.getElementById('map'), {
+        zoom: zoom,
         center: { lat: -34.397, lng: 150.644 },
-        zoom: 8,
       });
       updateMarkers();
     }
@@ -66,11 +65,10 @@ const GoogleMaps = ({ lugares }) => {
                   <p>Latitud: ${lugar.lat}</p>
                   <p>Longitud: ${lugar.lng}</p>
                   <p>${lugar.descripcion}</p>
-                  <p><button className="button">Ver detalle</button></p>
+                  <p><a href="${lugar.url.startsWith('https://') ? lugar.url : 'https://' + lugar.url}" target="_blank"><button className="button">Ver detalle</button></a></p>
                 </div>
               `,
             });
-
             infoWindow.open(mapRef.current, marker);
             infoWindowRef.current = infoWindow;
           });
@@ -83,7 +81,7 @@ const GoogleMaps = ({ lugares }) => {
     }
 
     updateMarkers();
-  }, [lugares]);
+  }, [lugares, zoom]);
 
   return <div id="map" style={{ height: '100vh', width: '100vw' }}></div>;
 };
