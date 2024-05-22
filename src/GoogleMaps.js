@@ -1,18 +1,24 @@
 import React, { useEffect, useRef } from 'react';
+import './GoogleMaps.css';
 
-const GoogleMap = ({ lugares }) => {
+const GoogleMaps = ({ lugares }) => {
   const mapRef = useRef(null);
   const markersRef = useRef([]);
+  const infoWindowRef = useRef(null);
 
   useEffect(() => {
     const loadScript = () => {
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDw5jHHfPvqZM8ErtgrM_19QiPvFRhwHiA
-      &callback=initMap`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDw5jHHfPvqZM8ErtgrM_19QiPvFRhwHiA&callback=initMap`;
       script.async = true;
       script.defer = true;
       window.initMap = initMap;
       document.head.appendChild(script);
+
+      return () => {
+        document.head.removeChild(script);
+        delete window.initMap;
+      };
     };
 
     if (!window.google) {
@@ -24,7 +30,7 @@ const GoogleMap = ({ lugares }) => {
     function initMap() {
       mapRef.current = new window.google.maps.Map(document.getElementById('map'), {
         center: { lat: -34.397, lng: 150.644 },
-        zoom: 8
+        zoom: 8,
       });
       updateMarkers();
     }
@@ -43,13 +49,16 @@ const GoogleMap = ({ lugares }) => {
           const marker = new window.google.maps.Marker({
             position: { lat: lugar.lat, lng: lugar.lng },
             map: mapRef.current,
-            title: lugar.nombre
+            title: lugar.nombre,
           });
           markersRef.current.push(marker);
           bounds.extend(marker.getPosition());
 
-          // Add click listener to marker
           marker.addListener('click', () => {
+            if (infoWindowRef.current) {
+              infoWindowRef.current.close();
+            }
+
             const infoWindow = new window.google.maps.InfoWindow({
               content: `
                 <div>
@@ -59,9 +68,11 @@ const GoogleMap = ({ lugares }) => {
                   <p>${lugar.descripcion}</p>
                   <p><button className="button">Ver detalle</button></p>
                 </div>
-              `
+              `,
             });
+
             infoWindow.open(mapRef.current, marker);
+            infoWindowRef.current = infoWindow;
           });
         }
       });
@@ -70,13 +81,11 @@ const GoogleMap = ({ lugares }) => {
         mapRef.current.fitBounds(bounds);
       }
     }
-    updateMarkers();
 
+    updateMarkers();
   }, [lugares]);
 
-  return (
-    <div id="map" style={{ height: '100vh', width: '100vw' }} ></div>
-  );
-}
+  return <div id="map" style={{ height: '100vh', width: '100vw' }}></div>;
+};
 
-export default GoogleMap;
+export default GoogleMaps;
